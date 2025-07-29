@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI,Depends
+from fastapi import FastAPI
 from scalar_fastapi import get_scalar_api_reference
 
 from app.api.router import master_router

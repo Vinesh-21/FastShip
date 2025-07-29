@@ -263,4 +263,34 @@ node_modules/
 
 # MongoDB dump files
 dump/
+
+# Alembic (DB Migrations)
+alembic/versions/*.pyc
+alembic/versions/__pycache__/
+
+# FastAPI
+openapi.json
+docs/openapi.json
+
+# Docker
+Dockerfile
+docker-compose.override.yml
+.dockerignore
+*.pid
+*.tar
+*.log
+
+# Frontend (React, Vue, etc.)
+node_modules/
+build/
+dist/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Jupyter/IPython (additional)
+*.nbconvert.ipynb
+
+
 >>>>>>> e73416b (Initial Commit)

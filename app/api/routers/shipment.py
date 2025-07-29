@@ -1,19 +1,16 @@
 from uuid import UUID
 from fastapi import APIRouter, HTTPException, status
 
-from app.api.dependencies import  SellerDep, ServiceDep
-from app.api.schemas.shipment import ShipmentCreate, ShipmentRead, ShipmentUpdate
+from ..dependencies import DeliveryPartnerDep, SellerDep, ShipmentServiceDep
+from ..schemas.shipment import ShipmentCreate, ShipmentRead, ShipmentUpdate
 
-# api router to group endpoints
+
 router = APIRouter(prefix="/shipment", tags=["Shipment"])
 
 
 ### Read a shipment by id
 @router.get("/", response_model=ShipmentRead)
-async def get_shipment(id: UUID,
-                        service: ServiceDep,
-                        seller:SellerDep
-):
+async def get_shipment(id: UUID, service: ShipmentServiceDep):
     # Check for shipment with given id
     shipment = await service.get(id)
 
@@ -26,15 +23,14 @@ async def get_shipment(id: UUID,
     return shipment
 
 
-### Create a new shipment with content and weight
+### Create a new shipment
 @router.post("/", response_model=ShipmentRead)
 async def submit_shipment(
+    seller: SellerDep,
     shipment: ShipmentCreate,
-    service: ServiceDep,
-    seller:SellerDep
-
+    service: ShipmentServiceDep,
 ):
-    return await service.add(shipment,seller.id)
+    return await service.add(shipment, seller)
 
 
 ### Update fields of a shipment
@@ -42,7 +38,8 @@ async def submit_shipment(
 async def update_shipment(
     id: UUID,
     shipment_update: ShipmentUpdate,
-    service: ServiceDep,
+    partner: DeliveryPartnerDep,
+    service: ShipmentServiceDep,
 ):
     # Update data with given fields
     update = shipment_update.model_dump(exclude_none=True)
@@ -52,13 +49,25 @@ async def update_shipment(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="No data provided to update",
         )
+    
+    # Validate logged in parter with assigned partner
+    # on the shipment with given id
+    shipment = await service.get(id)
 
-    return await service.update(id, update)
+    if shipment.delivery_partner_id != partner.id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authorized",
+        )
+
+    return await service.update(
+        shipment.sqlmodel_update(shipment_update),
+    )
 
 
 ### Delete a shipment by id
 @router.delete("/")
-async def delete_shipment(id: UUID, service: ServiceDep) -> dict[str, str]:
+async def delete_shipment(id: UUID, service: ShipmentServiceDep) -> dict[str, str]:
     # Remove from database
     await service.delete(id)
 
