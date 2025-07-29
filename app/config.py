@@ -7,6 +7,7 @@ _model_config = SettingsConfigDict(
     extra="ignore",
 )
 
+
 class DatabaseSettings(BaseSettings):
     POSTGRES_SERVER: str
     POSTGRES_PORT: int
@@ -34,10 +35,28 @@ class MongoDBSettings(BaseSettings):
     model_config = _model_config
 
 
+class NotificationSettings(BaseSettings):
+    MAIL_USERNAME: str
+    MAIL_PASSWORD: str
+    MAIL_FROM: str
+    MAIL_PORT: int
+    MAIL_SERVER: str
+    MAIL_FROM_NAME: str
+
+    MAIL_STARTTLS: bool = True
+    MAIL_SSL_TLS: bool = False
+    USE_CREDENTIALS: bool = True
+    VALIDATE_CERTS: bool = True
+
+    model_config = _model_config 
+
+
+
+
 security_settings=SecuritySettings()
 
 mongoDB_Settings =MongoDBSettings()
 
 settings = DatabaseSettings()
 
-
+notification_settings = NotificationSettings()
