@@ -7,6 +7,10 @@ _model_config = SettingsConfigDict(
     extra="ignore",
 )
 
+class AppSettings(BaseSettings):
+    APP_NAME: str = "FastShip"
+    APP_DOMAIN: str = "localhost:8000"
+
 
 class DatabaseSettings(BaseSettings):
     POSTGRES_SERVER: str
@@ -60,3 +64,5 @@ mongoDB_Settings =MongoDBSettings()
 settings = DatabaseSettings()
 
 notification_settings = NotificationSettings()
+
+app_settings = AppSettings()

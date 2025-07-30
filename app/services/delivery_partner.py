@@ -1,6 +1,6 @@
 from typing import Sequence
 
-from fastapi import HTTPException, status
+from fastapi import BackgroundTasks, HTTPException, status
 from sqlmodel import select, any_
 
 from app.api.schemas.delivery_partner import DeliveryPartnerCreate
@@ -10,8 +10,8 @@ from app.services.user import UserService
 
 
 class DeliveryPartnerService(UserService):
-    def __init__(self, session):
-        super().__init__(DeliveryPartner, session)
+    def __init__(self, session,tasks:BackgroundTasks):
+        super().__init__(DeliveryPartner, session,tasks)
 
     async def add(self, delivery_partner: DeliveryPartnerCreate):
         return await self._add_user(delivery_partner.model_dump())

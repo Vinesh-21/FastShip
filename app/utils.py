@@ -10,10 +10,15 @@ from uuid import uuid4
 
 from app.database.mongodb import blacklist_collection
 
+#itsDangerous
+from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
 APP_DIR = Path(__file__).resolve().parent
 
 TEMPLATE_DIR = APP_DIR/"templates"
+
+_serializer = URLSafeTimedSerializer(security_settings.JWT_SECERET_KEY)
+
 
 
 def generate_access_token(
@@ -57,4 +62,16 @@ async def invalidate_token(payload:dict):
 
 
 
-    
+def generate_url_safe_token(data:dict,salt:str|None =None)->str:
+    return _serializer.dumps(data,salt=salt)
+
+
+def decode_url_safe_token(token:str,salt:str|None =None,expiry: timedelta | None = None):
+    try:
+        return _serializer.loads(
+            token,
+            salt=salt,
+            max_age=expiry.total_seconds() if expiry else None,
+        )
+    except (BadSignature, SignatureExpired):
+        return None
