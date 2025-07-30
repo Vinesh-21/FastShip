@@ -10,6 +10,7 @@ from app.database.models import DeliveryPartner, Seller, Shipment, ShipmentStatu
 
 from app.services.base import BaseService
 from app.services.delivery_partner import DeliveryPartnerService
+from app.utils import verify_shipment_verfication_otp
 
 
 class ShipmentService(BaseService):
@@ -53,8 +54,8 @@ class ShipmentService(BaseService):
 
     # Update an existing shipment
     async def update(self, UUID: UUID,shipment_update:ShipmentUpdate,partner:DeliveryPartner) -> Shipment:
-        # Validate logged in parter with assigned partner
-        # on the shipment with given id
+         
+
         shipment = await self.get(UUID)
 
         if shipment.delivery_partner_id != partner.id:
@@ -63,14 +64,23 @@ class ShipmentService(BaseService):
                 detail="Not authorized",
             )
         
-        update = shipment_update.model_dump(exclude_none=True)
+        #Check for OTP in client Request Body
+        if shipment_update.status == ShipmentStatus.delivered:
+            verify =await verify_shipment_verfication_otp(shipment.id,shipment_update.verification_otp)
 
+            if not verify :
+                raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                                    detail="Invalid OTP")
+        
+        update = shipment_update.model_dump(exclude_none=True)
+        update.pop("verification_otp",None)
         if shipment_update.estimated_delivery:
             shipment.estimated_delivery = shipment_update.estimated_delivery
 
         # Event is added only when there is a meaningful update, such as:
         # - More than just estimated_delivery is being updated
         # - OR, estimated_delivery is not provided (implying status or location is being updated)
+        
         if (len(update) > 1)  or not shipment_update.estimated_delivery:
             await self.event_service.add(
                 shipment=shipment,

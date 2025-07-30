@@ -52,9 +52,19 @@ class NotificationSettings(BaseSettings):
     USE_CREDENTIALS: bool = True
     VALIDATE_CERTS: bool = True
 
+   
+
+    model_config = _model_config 
+
+class TwilioSettings(BaseSettings):
+    TWILIO_SID: str
+    TWILIO_AUTH_TOKEN: str
+    TWILIO_NUMBER: str
+
     model_config = _model_config 
 
 
+twilio_settings = TwilioSettings()
 
 
 security_settings=SecuritySettings()

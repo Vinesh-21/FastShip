@@ -12,6 +12,7 @@ mongo_client  = AsyncIOMotorClient(uri, server_api=ServerApi('1'))
 db = mongo_client.blacklisting_db
 
 blacklist_collection = db.invalid_tokens
+otp_collection = db.otp_sms
 
 async def connect_to_MongoDB():
   try:
@@ -25,7 +26,11 @@ async def connect_to_MongoDB():
 
 async def create_TTL_Indexing():
     print("Creating TTL index for the blacklist collection...")
-    blacklist_collection = db.invalid_tokens
     ttl_index = IndexModel([("exp", ASCENDING)], expireAfterSeconds=0)
     await blacklist_collection.create_indexes([ttl_index])
-    print("TTL index created successfully.")
+    print("Blacklist TTL index created successfully.")
+
+    print("Creating TTL index for the OTP collection...")
+    ttl_index_otp = IndexModel([("exp", ASCENDING)], expireAfterSeconds=0)
+    await otp_collection.create_indexes([ttl_index_otp])
+    print("OTP TTL index created successfully.")

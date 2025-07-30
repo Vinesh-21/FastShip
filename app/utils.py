@@ -6,9 +6,9 @@ from fastapi import HTTPException, status
 
 from app.config import security_settings
 
-from uuid import uuid4
+from uuid import UUID, uuid4
 
-from app.database.mongodb import blacklist_collection
+from app.database.mongodb import blacklist_collection,otp_collection
 
 #itsDangerous
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
@@ -75,3 +75,28 @@ def decode_url_safe_token(token:str,salt:str|None =None,expiry: timedelta | None
         )
     except (BadSignature, SignatureExpired):
         return None
+    
+async def add_shipment_verfication_otp(id:UUID ,otp:int,expiry:timedelta = timedelta(hours=6) ):
+
+    await otp_collection.insert_one({
+        "shipment_id":str(id),
+        "otp":otp,
+        "exp":datetime.now(tz=timezone.utc) + expiry
+    })
+
+async def _get_shipment_verfication_otp(id:UUID):
+
+    shipment = await otp_collection.find_one({"shipment_id":str(id)})
+
+    if not shipment:
+        return None
+    
+    return shipment["otp"]
+
+async def verify_shipment_verfication_otp(id:UUID,otp:int):
+    shipment_otp = await _get_shipment_verfication_otp(id)
+
+    if shipment_otp == otp:
+        return True
+    else:
+        return False

@@ -1,8 +1,10 @@
 
 
+from random import randint
 from app.services.base import BaseService
 from app.database.models import Shipment, ShipmentEvent, ShipmentStatus
 from app.services.notification import NotificationService
+from app.utils import add_shipment_verfication_otp
 
 
 class ShipmentEventService(BaseService):
@@ -90,7 +92,19 @@ class ShipmentEventService(BaseService):
                         },
                     template_name="mail_out_for_delivery.html"
                     )
+                
+                otp = randint(100_000,999_999)
+                await add_shipment_verfication_otp(id=shipment.id,otp=otp)
 
+                if shipment.client_contact_phone:
+                    await self.notification_service.send_sms(to=shipment.client_contact_phone,
+                                                       body=f"Your {shipment.content} order is Out for Delivery.Share the otp:{otp} with delivery partner to receive the order. ")
+                else:
+                    await self.notification_service.send_email(
+                        recipients=[shipment.client_contact_email],
+                        subject=f"OTP for your {shipment.content} shipment",
+                        body=f"Your {shipment.content} order is Out for Delivery.Share the otp:{otp} with delivery partner to receive the order. "
+                    )
 
             case ShipmentStatus.cancelled:
                 await self.notification_service.send_mail_with_template(

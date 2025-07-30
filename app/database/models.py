@@ -45,7 +45,7 @@ class Shipment(SQLModel, table = True):
     estimated_delivery: datetime
 
     client_contact_email: EmailStr 
-    client_contact_phone: int |None
+    client_contact_phone: str |None
     
 
     # Seller Relationship
