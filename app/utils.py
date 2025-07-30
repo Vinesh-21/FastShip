@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 import jwt
 
 from fastapi import HTTPException, status
@@ -10,8 +11,9 @@ from uuid import uuid4
 from app.database.mongodb import blacklist_collection
 
 
-# from rich import print
+APP_DIR = Path(__file__).resolve().parent
 
+TEMPLATE_DIR = APP_DIR/"templates"
 
 
 def generate_access_token(
