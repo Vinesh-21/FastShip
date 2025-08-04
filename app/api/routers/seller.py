@@ -1,5 +1,6 @@
 from typing import Annotated
 
+from app.core.security import TokenData
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -8,20 +9,20 @@ from fastapi.templating import Jinja2Templates
 from pydantic import EmailStr
 from app.config import app_settings
 
-from ..dependencies import SellerServiceDep, get_seller_access_token
+from app.api.dependencies import SellerDep, SellerServiceDep, get_seller_access_token
 from ..schemas.seller import SellerCreate, SellerRead
 
 router = APIRouter(prefix="/seller", tags=["Seller"])
 
 
 ### Register a new seller
-@router.post("/signup", response_model=SellerRead)
+@router.post("/signup", response_model=SellerRead,name="signupSeller")
 async def register_seller(seller: SellerCreate, service: SellerServiceDep):
     return await service.add(seller)
 
 
 ### Login a seller
-@router.post("/token")
+@router.post("/token",response_model=TokenData,name="loginSeller")
 async def login_seller(
     request_form: Annotated[OAuth2PasswordRequestForm, Depends()],
     service: SellerServiceDep,
@@ -32,9 +33,12 @@ async def login_seller(
         "type": "jwt",
     }
 
+@router.get("/seller/me", response_model=SellerRead,name="getSellerProfile")
+async def get_seller_profile(seller: SellerDep)->SellerDep:
+    return seller
 
 ### Logout a seller
-@router.get("/logout")
+@router.get("/logout",name="logoutSeller")
 async def logout_seller(
     token_data: Annotated[dict, Depends(get_seller_access_token)],
 ):
@@ -45,7 +49,7 @@ async def logout_seller(
 
 
 ### Forget Password
-@router.get("/forgot_password")
+@router.get("/forgot_password",name="forgotPassword")
 async def forget_password(email:EmailStr,service: SellerServiceDep):
     await service.send_password_reset_link(email,router.prefix)
     return {"detail": "Check email for password reset link"}
@@ -53,7 +57,7 @@ async def forget_password(email:EmailStr,service: SellerServiceDep):
 # Templating Engine 
 templates = Jinja2Templates(TEMPLATE_DIR)
 ### Reset Password Form
-@router.get("/reset_password_form")
+@router.get("/reset_password_form",include_in_schema=False)
 async def get_reset_password_form(request: Request, token: str):
 
     return templates.TemplateResponse(

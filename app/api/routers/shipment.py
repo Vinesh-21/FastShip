@@ -19,7 +19,7 @@ templates = Jinja2Templates(TEMPLATE_DIR)
 
 
 ### Read a shipment by id
-@router.get("/", response_model=ShipmentRead)
+@router.get("/", response_model=ShipmentRead,name="getShipment")
 async def get_shipment(id: UUID, service: ShipmentServiceDep):
     # Check for shipment with given id
     shipment = await service.get(id)
@@ -34,7 +34,7 @@ async def get_shipment(id: UUID, service: ShipmentServiceDep):
 
 
 # Tracking shipment
-@router.get("/track")
+@router.get("/track",include_in_schema=False)
 async def get_tracking(request:Request,id: UUID, service: ShipmentServiceDep):
     
     shipment = await service.get(id)
@@ -52,7 +52,14 @@ async def get_tracking(request:Request,id: UUID, service: ShipmentServiceDep):
     )
 
 ### Create a new shipment
-@router.post("/", response_model=ShipmentRead)
+@router.post("/", response_model=ShipmentRead ,
+             name="createShipment",
+             description="Create A New Shipment",
+             status_code=status.HTTP_201_CREATED,
+             responses={
+                 status.HTTP_201_CREATED: {"description": "Shipment successfully created."},
+                 status.HTTP_406_NOT_ACCEPTABLE: {"description": "No delivery partner available at the moment."},
+             })
 async def submit_shipment(
     seller: SellerDep,
     shipment: ShipmentCreate,
@@ -62,7 +69,7 @@ async def submit_shipment(
 
 
 ### Update fields of a shipment
-@router.patch("/", response_model=ShipmentRead)
+@router.patch("/", response_model=ShipmentRead,name="updateShipment")
 async def update_shipment(
     id: UUID,
     shipment_update: ShipmentUpdate,
@@ -83,7 +90,7 @@ async def update_shipment(
 
 
 ### cancel a shipment by id
-@router.get("/cancel",response_model=ShipmentRead)
+@router.get("/cancel",response_model=ShipmentRead,name="cancelShipment")
 async def delete_shipment(id: UUID, seller:SellerDep,service: ShipmentServiceDep) -> dict[str, str]:
     # Remove from database
     return await service.cancel(id,seller)
