@@ -1,3 +1,4 @@
+from uuid import UUID
 from pydantic import BaseModel,EmailStr
 
 
@@ -17,3 +18,6 @@ class DeliveryPartnerUpdate(BaseModel):
 
 class DeliveryPartnerCreate(BaseDeliveryPartner):
     password: str
+
+class DeliveryPartnerResponse(BaseDeliveryPartner):
+    id:UUID

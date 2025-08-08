@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from app.core.security import TokenData
+from app.database.models import DeliveryPartner
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -14,6 +15,7 @@ from ..dependencies import (
 from ..schemas.delivery_partner import (
     DeliveryPartnerCreate,
     DeliveryPartnerRead,
+    DeliveryPartnerResponse,
     DeliveryPartnerUpdate,
 )
 
@@ -41,7 +43,7 @@ async def login_delivery_partner(
         "type": "jwt",
     }
 
-@router.get("/me", response_model=DeliveryPartnerRead, name="getDeliveryPartnerProfile")
+@router.get("/partner/me", response_model=DeliveryPartnerResponse, name="getDeliveryPartnerProfile")
 async def get_partner_profile(
     partner: DeliveryPartnerDep,
 ) -> DeliveryPartnerDep:

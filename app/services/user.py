@@ -33,6 +33,8 @@ class UserService(BaseService):
         )
         return await self._add(user)
 
+ 
+
     async def _get_by_email(self, email) -> User | None:
         return await self.session.scalar(
             select(self.model).where(self.model.email == email)

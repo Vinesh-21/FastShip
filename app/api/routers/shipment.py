@@ -1,4 +1,5 @@
 from uuid import UUID
+from app.database.models import UserType
 from fastapi import APIRouter, HTTPException, Request, status
 from fastapi.responses import HTMLResponse
 
@@ -31,6 +32,12 @@ async def get_shipment(id: UUID, service: ShipmentServiceDep):
         )
 
     return shipment
+
+### Read all shipments
+@router.get("/allShipments", response_model=list[ShipmentRead],name="getAllShipments")
+async def get_all_shipments(user_type:UserType,user_id:UUID,service: ShipmentServiceDep):
+   
+   return await service.get_all_shipments(user_type,user_id)
 
 
 # Tracking shipment

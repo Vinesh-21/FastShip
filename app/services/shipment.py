@@ -6,11 +6,12 @@ from fastapi import HTTPException,status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.schemas.shipment import ShipmentCreate, ShipmentUpdate
-from app.database.models import DeliveryPartner, Seller, Shipment, ShipmentStatus
+from app.database.models import DeliveryPartner, Seller, Shipment, ShipmentStatus, UserType
 
 from app.services.base import BaseService
 from app.services.delivery_partner import DeliveryPartnerService
 from app.utils import verify_shipment_verfication_otp
+from sqlmodel import select
 
 
 class ShipmentService(BaseService):
@@ -23,6 +24,27 @@ class ShipmentService(BaseService):
         super().__init__(Shipment, session)
         self.partner_service = partner_service
         self.event_service = event_service
+
+
+
+    # # Get all shipments related to type of user-"seller" or Partner
+    async def get_all_shipments(self, user_type:UserType,user_id:UUID) -> Shipment | None:
+        
+        if user_type == UserType.SELLER:
+            result = await self.session.execute(
+                select(Shipment).where(Shipment.seller_id == user_id)
+            )
+        elif user_type == UserType.PARTNER:
+            result = await self.session.execute(
+                select(Shipment).where(Shipment.delivery_partner_id == user_id)
+            )
+        else:
+            return []
+
+        return result.scalars().all()
+    
+
+
 
     # Get a shipment by id
     async def get(self, id: UUID) -> Shipment | None:

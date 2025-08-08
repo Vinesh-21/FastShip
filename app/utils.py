@@ -78,6 +78,11 @@ def decode_url_safe_token(token:str,salt:str|None =None,expiry: timedelta | None
     
 async def add_shipment_verfication_otp(id:UUID ,otp:int,expiry:timedelta = timedelta(hours=6) ):
 
+
+    alreadyExists = await otp_collection.find_one({"shipment_id":str(id)})
+    if(alreadyExists):
+        await otp_collection.delete_one({"shipment_id":str(id)})
+
     await otp_collection.insert_one({
         "shipment_id":str(id),
         "otp":otp,

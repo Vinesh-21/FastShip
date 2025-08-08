@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from app.core.security import TokenData
+from app.database.models import Seller
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -10,7 +11,7 @@ from pydantic import EmailStr
 from app.config import app_settings
 
 from app.api.dependencies import SellerDep, SellerServiceDep, get_seller_access_token
-from ..schemas.seller import SellerCreate, SellerRead
+from app.api.schemas.seller import SellerCreate, SellerRead, SellerResponse
 
 router = APIRouter(prefix="/seller", tags=["Seller"])
 
@@ -33,8 +34,9 @@ async def login_seller(
         "type": "jwt",
     }
 
-@router.get("/seller/me", response_model=SellerRead,name="getSellerProfile")
+@router.get("/seller/me", response_model=SellerResponse,name="getSellerProfile")
 async def get_seller_profile(seller: SellerDep)->SellerDep:
+    
     return seller
 
 ### Logout a seller

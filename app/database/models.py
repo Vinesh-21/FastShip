@@ -16,6 +16,9 @@ class ShipmentStatus(str, Enum):
     delivered = "delivered"
     cancelled = "cancelled"
 
+class UserType(str,Enum):
+    SELLER="seller"
+    PARTNER="partner"
 
 class User(SQLModel):
     name:str
