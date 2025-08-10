@@ -2,15 +2,15 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.routing import APIRoute
 from scalar_fastapi import get_scalar_api_reference
 
 from app.api.router import master_router
-from app.database.session import create_db_tables, get_session
+from app.database.session import create_db_tables
 
 
 #MongoDB
 from app.database.mongodb import connect_to_MongoDB,create_TTL_Indexing
+from app.config import app_settings
 
 
 @asynccontextmanager
@@ -21,6 +21,7 @@ async def lifespan_handler(app: FastAPI):
     yield
 
 
+# Meta Data
 description="""
 Delivery Managment System For Sellers And Delivery Partners
 
@@ -35,7 +36,7 @@ Delivery Managment System For Sellers And Delivery Partners
 """
 
 
-
+### FastAPI APP With General MetaData
 app = FastAPI(
 
     title="FastShip",
@@ -67,8 +68,11 @@ app = FastAPI(
     lifespan=lifespan_handler,
 )
 
+
+
+# MiddleWare
 origins = [
-    "http://localhost:5173","http://127.0.0.1:5173",
+    app_settings.APP_DOMAIN,"http://localhost:5173","http://127.0.0.1:5173"
 ]
 
 app.add_middleware(
@@ -79,6 +83,8 @@ app.add_middleware(
     allow_headers=["*"],                
 )
 
+
+# Master Router
 app.include_router(master_router)
 
 

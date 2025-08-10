@@ -1,7 +1,6 @@
 from typing import Annotated
 
 from app.core.security import TokenData
-from app.database.models import Seller
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -13,6 +12,8 @@ from app.config import app_settings
 from app.api.dependencies import SellerDep, SellerServiceDep, get_seller_access_token
 from app.api.schemas.seller import SellerCreate, SellerRead, SellerResponse
 
+
+### Seller Router
 router = APIRouter(prefix="/seller", tags=["Seller"])
 
 
@@ -34,6 +35,7 @@ async def login_seller(
         "type": "jwt",
     }
 
+### Get Seller Info 
 @router.get("/seller/me", response_model=SellerResponse,name="getSellerProfile")
 async def get_seller_profile(seller: SellerDep)->SellerDep:
     
@@ -56,9 +58,11 @@ async def forget_password(email:EmailStr,service: SellerServiceDep):
     await service.send_password_reset_link(email,router.prefix)
     return {"detail": "Check email for password reset link"}
 
-# Templating Engine 
+### Templating Engine 
 templates = Jinja2Templates(TEMPLATE_DIR)
-### Reset Password Form
+
+
+### Reset Password Form [This Route is Not used in Front-End]
 @router.get("/reset_password_form",include_in_schema=False)
 async def get_reset_password_form(request: Request, token: str):
 
@@ -80,8 +84,9 @@ async def reset_password(
     service: SellerServiceDep,
 ):
     is_success = await service.reset_password(token, password)
-
-    return templates.TemplateResponse(
-        request=request,
-        name="password/reset_success.html" if is_success else "password/reset_failed.html",
-    )
+    if(is_success):
+        return {"detail": "Your Password has been changed"}
+    # return templates.TemplateResponse(
+    #     request=request,
+    #     name="password/reset_success.html" if is_success else "password/reset_failed.html",
+    # )

@@ -206,7 +206,7 @@ export interface ShipmentCreate {
    */
   client_contact_email: string;
   /** Client Contact Phone */
-  client_contact_phone?: number | null;
+  client_contact_phone?: string | null;
 }
 
 /** ShipmentEvent */
@@ -840,6 +840,32 @@ export class Api<
         path: `/partner/logout`,
         method: "GET",
         secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Delivery Partner
+     * @name ForgotPasswordPartner
+     * @summary Forgotpasswordpartner
+     * @request GET:/partner/forgot_password
+     */
+    forgotPasswordPartner: (
+      query: {
+        /**
+         * Email
+         * @format email
+         */
+        email: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<any, HTTPValidationError>({
+        path: `/partner/forgot_password`,
+        method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),

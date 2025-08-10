@@ -11,7 +11,7 @@ from fastapi.templating import Jinja2Templates
 
 from app.utils import TEMPLATE_DIR
 
-
+### Shipment Router
 router = APIRouter(prefix="/shipment", tags=["Shipment"])
 
 # Templeting Engine
@@ -40,7 +40,7 @@ async def get_all_shipments(user_type:UserType,user_id:UUID,service: ShipmentSer
    return await service.get_all_shipments(user_type,user_id)
 
 
-# Tracking shipment
+# Tracking shipment [Not used in front-end]
 @router.get("/track",include_in_schema=False)
 async def get_tracking(request:Request,id: UUID, service: ShipmentServiceDep):
     

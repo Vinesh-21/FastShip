@@ -13,7 +13,7 @@ from app.services.delivery_partner import DeliveryPartnerService
 from app.utils import verify_shipment_verfication_otp
 from sqlmodel import select
 
-
+### Business Logic For Shipment  
 class ShipmentService(BaseService):
     def __init__(
         self,
@@ -112,6 +112,7 @@ class ShipmentService(BaseService):
         return await self._update(shipment)
 
 
+    # Cancel Shipment
     async def cancel(self,id:UUID,seller:Seller)->Shipment:
         shipment =await self.get(id)
         if shipment.seller.id != seller.id:

@@ -8,9 +8,9 @@ _model_config = SettingsConfigDict(
 )
 
 class AppSettings(BaseSettings):
-    APP_NAME: str = "FastShip"
-    APP_DOMAIN: str = "localhost:8000"
-
+    APP_NAME: str 
+    APP_DOMAIN: str
+    model_config=_model_config
 
 class DatabaseSettings(BaseSettings):
     POSTGRES_SERVER: str

@@ -93,7 +93,7 @@ async def forget_password_partner(email: EmailStr, service: DeliveryPartnerServi
     return {"detail": "Check email for password reset link"}
 
 
-### Reset Password Form (hidden from OpenAPI)
+### Reset Password Form [This Route is Not used in Front-End]
 @router.get("/reset_password_form", include_in_schema=False)
 async def get_reset_password_form(request: Request, token: str):
 
@@ -116,8 +116,10 @@ async def reset_password_partner(
 ):
 
     is_success = await service.reset_password(token, password)
-
-    return templates.TemplateResponse(
-        request=request,
-        name="password/reset_success.html" if is_success else "password/reset_failed.html",
-    )
+    if(is_success):
+        return {"detail": "Your Password has been changed"}
+    
+    # return templates.TemplateResponse(
+    #     request=request,
+    #     name="password/reset_success.html" if is_success else "password/reset_failed.html",
+    # )

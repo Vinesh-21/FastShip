@@ -6,7 +6,7 @@ from app.database.models import Shipment, ShipmentEvent, ShipmentStatus
 from app.services.notification import NotificationService
 from app.utils import add_shipment_verfication_otp
 
-
+### Business Logic For Shipment TimeLine  
 class ShipmentEventService(BaseService):
     
     def __init__(self,session,tasks):
@@ -14,6 +14,7 @@ class ShipmentEventService(BaseService):
         super().__init__(ShipmentEvent,session)
         self.notification_service = NotificationService(tasks)
 
+    # Add Shipment Event to the Timeline
     async def add(self,
                   shipment:Shipment,
                   location:int = None ,
@@ -37,6 +38,7 @@ class ShipmentEventService(BaseService):
 
         return await self._add(new_event)
     
+    # Get latest Event based On created_at
     async def get_latest_event(self,shipment:Shipment):
         timeline = shipment.timeline
 
@@ -44,7 +46,7 @@ class ShipmentEventService(BaseService):
 
         return timeline[-1]
     
-
+    #  Generate Description
     def _generate_description(self, status: ShipmentStatus, location: int):
         match status:
             case ShipmentStatus.placed:
@@ -58,6 +60,7 @@ class ShipmentEventService(BaseService):
             case _: 
                 return f"scanned at {location}"
 
+    # Send Mail/SMS based on Shipment status
     async def _notif(self, shipment: Shipment, status: ShipmentStatus):
 
         if status == ShipmentStatus.in_transit:

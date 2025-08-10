@@ -63,7 +63,12 @@ class UserService(BaseService):
         )
 
     async def send_password_reset_link(self, email, router_prefix):
+
+
         user = await self._get_by_email(email)
+
+        if(not user):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"User Not Found in {router_prefix[1:]} Database")
 
         token = generate_url_safe_token({"id": str(user.id)}, salt="password-reset")
 
@@ -85,7 +90,9 @@ class UserService(BaseService):
         )
 
         if not token_data:
-            return False
+            raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,
+                detail="Invalid Token"
+            )
 
         user = await self._get(UUID(token_data["id"]))
         user.password_hash = password_context.hash(password)

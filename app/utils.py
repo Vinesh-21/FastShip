@@ -13,17 +13,20 @@ from app.database.mongodb import blacklist_collection,otp_collection
 #itsDangerous
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
+# Gets the Parent Dir Path
 APP_DIR = Path(__file__).resolve().parent
 
+# Template Dir path
 TEMPLATE_DIR = APP_DIR/"templates"
 
+### It'sDangerous - URLSafeTimeSerializer for Password Reset
 _serializer = URLSafeTimedSerializer(security_settings.JWT_SECERET_KEY)
 
 
-
+### Generate JWT
 def generate_access_token(
     data: dict,
-    expiry: timedelta = timedelta(days=7),
+    expiry: timedelta = timedelta(days=2),
 ) -> str:
     return jwt.encode(
         payload={
@@ -35,7 +38,7 @@ def generate_access_token(
         key=security_settings.JWT_SECERET_KEY,
     )
 
-
+### Decode JWT
 def decode_access_token(token: str) -> dict | None:
     try:
         return jwt.decode(
@@ -46,12 +49,12 @@ def decode_access_token(token: str) -> dict | None:
     except jwt.PyJWTError:
         return None
 
-
+### On Login if The JWT is in Blacklist it means need to Re-login again
 async def is_jti_blacklisted(jti:str):
     record = await blacklist_collection.find_one({"jti":jti})
     return record is not None
 
-
+### On user Logout Add to the BlackList
 async def invalidate_token(payload:dict):
 
 
@@ -61,11 +64,11 @@ async def invalidate_token(payload:dict):
     print("invalitadated user",payload["user"])
 
 
-
+### Generate URL_Token for Reset Password
 def generate_url_safe_token(data:dict,salt:str|None =None)->str:
     return _serializer.dumps(data,salt=salt)
 
-
+### Decode URL_Token for Reset Password Verfication
 def decode_url_safe_token(token:str,salt:str|None =None,expiry: timedelta | None = None):
     try:
         return _serializer.loads(
@@ -75,7 +78,8 @@ def decode_url_safe_token(token:str,salt:str|None =None,expiry: timedelta | None
         )
     except (BadSignature, SignatureExpired):
         return None
-    
+
+### On Shipment Status-Out For Delivery Add OTP in Collection For later Verification
 async def add_shipment_verfication_otp(id:UUID ,otp:int,expiry:timedelta = timedelta(hours=6) ):
 
 
@@ -89,6 +93,7 @@ async def add_shipment_verfication_otp(id:UUID ,otp:int,expiry:timedelta = timed
         "exp":datetime.now(tz=timezone.utc) + expiry
     })
 
+### get OTP Based On shipment ID
 async def _get_shipment_verfication_otp(id:UUID):
 
     shipment = await otp_collection.find_one({"shipment_id":str(id)})
@@ -98,6 +103,8 @@ async def _get_shipment_verfication_otp(id:UUID):
     
     return shipment["otp"]
 
+
+### Verify The Partner Entered OTP With OTP in Collections
 async def verify_shipment_verfication_otp(id:UUID,otp:int):
     shipment_otp = await _get_shipment_verfication_otp(id)
 

@@ -7,8 +7,11 @@ from app.utils import TEMPLATE_DIR
 
 from twilio.rest import Client
 
+### Notification Service
 class NotificationService:
     def __init__(self,tasks:BackgroundTasks):
+
+        ### FastMail(SMTP) For Mailing
         self.fastmail = FastMail(
             ConnectionConfig(
                 **notification_settings.model_dump(),
@@ -17,7 +20,8 @@ class NotificationService:
         )
 
         self.tasks =tasks
-
+        
+        ### Twilio Client For SMS
         self.twilio_client =Client(
             twilio_settings.TWILIO_SID,
             twilio_settings.TWILIO_AUTH_TOKEN
@@ -25,7 +29,7 @@ class NotificationService:
 
 
 
-
+    ### Send Mail
     async def send_email(self,recipients: list[EmailStr],subject: str,body: str):
 
         self.tasks.add_task(
@@ -38,6 +42,7 @@ class NotificationService:
             )   
         )
 
+    ### Send Mail
     async def send_mail_with_template(self,recipients: list[EmailStr],subject: str,context: dict,template_name:str):
         self.tasks.add_task(
             self.fastmail.send_message,
@@ -49,7 +54,7 @@ class NotificationService:
             ),
             template_name=template_name
         )
-
+    ### Send SMS
     async def send_sms(self,to:str, body:str):
         self.tasks.add_task(
             self.twilio_client.messages.create,
