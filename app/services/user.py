@@ -77,7 +77,7 @@ class UserService(BaseService):
             subject="FastShip Account Password Reset",
             context={
                 "username": user.name,
-                "reset_url": f"http://{app_settings.APP_DOMAIN}{router_prefix}/reset_password_form?token={token}",
+                "reset_url": f"{app_settings.APP_DOMAIN}{router_prefix}/reset_password_form?token={token}",
             },
             template_name="mail_password_reset.html",
         )
